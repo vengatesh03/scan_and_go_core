@@ -1,0 +1,153 @@
+<html>
+<head>
+<style>
+ /* Font Definitions */
+ @font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;
+	mso-font-charset:1;
+	mso-generic-font-family:roman;
+	mso-font-format:other;
+	mso-font-pitch:variable;
+	mso-font-signature:0 0 0 0 0 0;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:-469750017 -1073732485 9 0 511 0;}
+body{
+	font-family:"Calibri",sans-serif;
+}
+</style>
+</head>
+<body>
+<table border=1 cellspacing=0 cellpadding=0 style='border-collapse:collapse;border:none;'>
+ <tr style='height:27.85pt'>
+   <td width=279 valign=top style='width:212.65pt;border:none;padding:0in 5.4pt 0in 5.4pt;
+   height:27.85pt'>
+   <p style='margin-bottom:0in;margin-bottom:.0001pt;line-height:normal'>
+   		<b>
+		   	<span style='font-size:16.0pt'>
+				<span style='color:#0070C0'>{{infyn_name}}</span>
+			</span>
+		</b>
+	</p>
+   </td>
+  <td width=287 valign=top style='width:219.7pt;border:none;padding:0in 5.4pt 0in 5.4pt;
+  height:27.85pt'>
+  <p align=center style='margin-bottom:0in;margin-bottom:.0001pt; text-align:center;line-height:normal'>
+  	<b><span style='font-size:20.0pt'>Receipt<o:p></b></p>
+  </td>
+ </tr>
+ <tr>
+   <td width=279 valign=top style='width:212.65pt;border:none;padding:0in 5.4pt 0in 5.4pt'>
+   <p style='margin-bottom:0in;margin-bottom:.0001pt;line-height:normal'>
+<span >{{infyn_place}}</span></p>
+   </td>
+  <td width=287 valign=top style='width:219.7pt;border:none;padding:0in 5.4pt 0in 5.4pt'>
+  <p style='margin-bottom:0in;margin-bottom:.0001pt;line-height:normal'>
+<span >Telephone Number: {{infyn_phone}}</span></p>
+  </td>
+ </tr>
+ <tr >  
+    <td width=279 valign=top style='width:212.65pt;border:none;padding:0in 5.4pt 0in 5.4pt'>
+    	<p style='margin-bottom:0in;margin-bottom:.0001pt; line-height:normal'>
+    		<span>
+    			{{infyn_state}}
+    		</span>
+    	</p>
+    </td>
+  <td width=287 valign=top style='width:219.7pt;border:none;padding:0in 5.4pt 0in 5.4pt'>
+  	<p style='margin-bottom:0in;margin-bottom:.0001pt;line-height:normal'>
+  		<span >Email: {{infyn_email}}</span>
+  	</p>
+  </td>
+ </tr>
+ <tr>  
+    <td width=279 valign=top style='width:212.65pt;border:none;padding:0in 5.4pt 0in 5.4pt'>
+	    <p style='margin-bottom:0in;margin-bottom:.0001pt;line-height:normal'>
+	    	<span >{{infyn_gst}}</span>
+	    </p>
+    </td>
+  	<td width=287 valign=top style='width:219.7pt;border:none;padding:0in 5.4pt 0in 5.4pt'>
+	  <p style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+	  normal'>
+<span >Website: {{infyn_website}}</span></p>
+  	</td>
+ </tr>
+ <tr>
+  <td width=279 valign=top style='width:212.65pt;border:none;border-bottom:
+  solid black 1.0pt; padding:0in 5.4pt 0in 5.4pt'>
+  	
+  </td>
+  <td width=287 valign=top style='width:219.7pt;border:none;border-bottom:solid black 1.0pt;padding:0in 5.4pt 0in 5.4pt'>
+  	<p style='margin-bottom:0in;margin-bottom:.0001pt;line-height: normal'>&nbsp;</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=279 valign=top style='width:212.65pt;border:solid black 1.0pt;
+  border-top:none; padding:0in 5.4pt 0in 5.4pt'>
+  	<p style='margin-bottom:0in;margin-bottom:.0001pt;line-height: normal'>
+  		<b><span >From: </b>
+  	</p>
+    <p style='margin-bottom:0in;margin-bottom:.0001pt; line-height:normal'>
+    	<span >{{customer_company}}</span>
+    </p>
+   	<p style='margin-bottom:0in;margin-bottom:.0001pt; line-height:normal'>
+   		<span >{{customer_address}}</span>
+   	</p>
+   	<br/>
+  </td>
+  <td width=287 valign=top style='width:219.7pt;border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;padding:0in 5.4pt 0in 5.4pt'>  
+  	<br/>
+  	<p style='margin-bottom:0in;margin-bottom:.0001pt;line-height:normal'>
+		<span >Date: {{receipt_date}}</span></p>
+  	<p style='margin-bottom:0in;margin-bottom:.0001pt;line-height:normal'>
+		<span >Receipt Number: {{receipt_no}}</span></p>
+  </td>
+ </tr>
+</table>
+<br/>
+
+<table  border=1 cellspacing=0 cellpadding=0 align=left style='border-collapse:collapse;border:none;'>
+ <tr>
+  <td width=409 valign=top style='width:311.85pt;border:solid black 1.0pt;padding:0in 5.4pt 0in 5.4pt'>
+  	<p style='margin-bottom:0in;margin-bottom:.0001pt;line-height:normal;'>
+		<span >Description:</span>
+	</p>
+  </td>
+  <td width=157 valign=top style='width:119.05pt;border:solid black 1.0pt; border-left:none;padding:0in 5.4pt 0in 5.4pt'>
+  	<p style='margin-bottom:0in;margin-bottom:.0001pt;line-height:normal;'>
+		<span >Amount Paid:</span></p>
+  </td>
+ </tr>
+ <tr style='height:112.9pt'>
+  <td width=409 valign=top style='width:311.85pt;border:solid black 1.0pt; border-top:none;   padding:0in 5.4pt 0in 5.4pt;height:112.9pt'>
+  	<p style='margin-bottom:0in;margin-bottom:.0001pt;line-height:normal;'>
+		<span >{{line_item}}</span>
+	</p>
+  </td>
+  <td width=157 valign=top style='width:119.05pt;border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt; padding:0in 5.4pt 0in 5.4pt;height:112.9pt'>
+  	<p align=right style='margin-bottom:0in;margin-bottom:.0001pt; text-align:right;line-height:normal;'>
+		<span >{{amount}}</span>
+	</p>
+  </td>
+ </tr>
+ <tr style='height:34.5pt'>
+  <td width=409 valign=top style='width:311.85pt;border:solid black 1.0pt; border-top:none; padding:0in 5.4pt 0in 5.4pt;height:34.5pt'>
+  	<p align=center style='margin-top:12.0pt;margin-right:0in; margin-bottom:0in;margin-left:0in;margin-bottom:.0001pt;text-align:center; line-height:150%;'>
+  		<b><span  style='font-family:"Arial",sans-serif'>Total Payment Received with Thanks</b>
+  	</p>
+  </td>
+  <td width=157 valign=top style='width:119.05pt;border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt; padding:0in 5.4pt 0in 5.4pt;height:34.5pt'>
+  	<p align=right style='margin-top:12.0pt;margin-right:0in;
+  margin-bottom:0in;margin-left:0in;margin-bottom:.0001pt;text-align:right;line-height:normal;'>
+		<span >{{amount}}</span>
+	</p>
+  </td>
+ </tr>
+</table>
+</body>
+</html>

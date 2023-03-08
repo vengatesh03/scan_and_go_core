@@ -1,0 +1,48 @@
+{
+    "D" 				                 : true,
+    "host"				:"10.0.0.142",
+    "port"				:3306,
+    "db_cert"				:"/etc/ec/db.crt",
+    "db_username"		             : "doadmin",
+    "db_password"		             : "Infyn@321",
+    "db_name"			               : "stagingdb",
+    "secret"			               : "infynect",
+    "environment"                : "production",
+    "notification_email_from"    : "notifications@infynect.com",
+    "notification_email_password": "Infyn@2019",
+    "support_email"	             : "support@infynect.com",
+    "config_path"		         : "/etc/ec/config/",
+    "advertisement_path"         : "/etc/ec/spido-ipack.livye.com/ad_images",
+    "expire_time_for_wvlicense"  : 2592000,
+    "report_path"                : "/etc/ec/reports/",
+    "ZeeCatalogue"               : {
+        "ZeeCatalogueToken_php"      :  "/etc/ec/ZeeCatalogueToken.php",
+        "ZeeCatalogue_host"          : "gwapi.zee5.com",
+        "ZeeCataloguetoken_uri"      : "/user/getToken",
+        "ZeeCataloguecontent_uri"    : "/content/partnerFeeds/listing?page=",
+        "ZeeCataloguecontent_query"  : {
+        	"ZeeCatalogueMovies_query"   : "&asset_type=0&asset_subtype=movie",
+	        "ZeeCatalogueTVShows_query"  : "&asset_type=1&asset_subtype=episode",
+	        "ZeeCatalogueWebisodes_query": "&asset_type=1&asset_subtype=webisode",
+	        "ZeeCatalogueOriginals_query": "&asset_type=6&asset_subtype=original",
+	        "ZeeCatalogueMobisodes_query": "&asset_type=1&asset_subtype=mobisode",
+		"ZeeCatalogueLive_query"         : "&asset_type=9"
+        }
+    },
+    "report_header"                      : {
+        "header_content"                 : "INFYNECT LABS PVT LTD",
+        "sub_content"                    : "Bangalore, Karnataka - 560095",
+        "sub_content_data"               : "Email: info@infynect.com",
+        "sub_content_gst"                : "GST No: 29AAECI6884M1ZP"
+ 
+    },
+    "receipt_details"                    : {
+        "infyn_name"                     : "Infynect Labs Pvt Ltd",
+        "infyn_place"                    : "Bangalore",
+        "infyn_state"                    : "Karnataka - 560095",
+        "infyn_gst"                      : "GSTIN (df-29AAECI6884M1ZP)",
+        "infyn_email"                    : "info@infynect.com",
+        "infyn_phone"                    : "9898989898",
+        "infyn_website"                  : "www.infynect.com"
+    }
+}

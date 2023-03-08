@@ -1,0 +1,394 @@
+const Sequelize = require('sequelize-views-support');
+const editJsonFile = require("edit-json-file");
+const fs = require('fs');
+
+//Initialize variables
+var     conf = require(__root+__core+'config.json');
+
+var db_username         =       conf.db_username,
+        db_password             =       conf.db_password,
+        db_name                 =       conf.db_name;
+if(conf.environment == 'production'){
+        var port                =       conf.port,
+                host            =   conf.host;
+}else{
+        var port                =       5432,
+                host            =   'localhost';
+}
+
+
+//Declare OperatorAliases
+global.Op = Sequelize.Op;
+
+const operatorsAliases = {
+	$notIn	: Op.likenotIn,
+	$like   : Op.like,
+	$gte  	: Op.gte,
+	$lte	: Op.lte,
+	$lt   	: Op.lt,
+	$gt   	: Op.gt,
+	$ne   	: Op.ne,
+	$or 	: Op.or,
+	$eq 	: Op.eq,
+	$col    : Op.col,
+	$in     : Op.in,
+	$any	: Op.any,
+	$contains : Op.contains
+}
+
+var pool= {
+        max: 4,
+        min: 0,
+        acquire: 120000,
+        idle: 10000
+    }
+
+var retry= {  
+      match: [/Deadlock/i],
+      max: 3, // Maximum rety 3 times
+      backoffBase: 1000, // Initial backoff duration in ms. Default: 100,
+      backoffExponent: 1.5, // Exponent to increase backoff each try. Default: 1.1
+    };
+
+var sequelize = new Sequelize('mysql://'+db_username+':'+db_password+'@'+host+':'+port+'/'+db_name,{ define: {charset: 'utf8',collate: 'utf8_general_ci', timestamps: true},logging:false,dialectOptions: {dateStrings: true,typeCast: true},timezone: '+05:30',operatorsAliases,pool:pool,retry:retry});
+//Model Initialization
+sequelize.sync().then(function() {});
+
+//User Model
+var User = sequelize.define('users', {
+        user_id                 : { type : Sequelize.UUID, defaultValue : Sequelize.UUIDV1, primaryKey : true},
+        org_id                  : { type : Sequelize.UUID },
+        reseller_org_id : { type : Sequelize.UUID },
+        org_name        : { type : Sequelize.STRING },
+        roles           : { type : Sequelize.STRING },
+        first_name              : { type : Sequelize.STRING },
+        last_name               : { type : Sequelize.STRING },
+        password                : { type : Sequelize.STRING },
+        username        : { type : Sequelize.STRING, unique : true },
+        phone_number    : { type : Sequelize.STRING },
+	partner_code	: { type : Sequelize.STRING},
+        status                  : { type : Sequelize.BOOLEAN }
+});
+
+var Org = sequelize.define('orgs', {
+	org_id 			: { type : Sequelize.UUID, defaultValue : Sequelize.UUIDV1, primaryKey : true },
+	reseller_org_id : { type : Sequelize.UUID },
+	org_name        : { type : Sequelize.STRING, unique : true },
+	org_type		: { type : Sequelize.STRING },
+	technical_email	: { type : Sequelize.STRING },
+	report_email 	: { type : Sequelize.STRING },
+	phone_no    	: { type : Sequelize.STRING },
+	state			: { type : Sequelize.STRING },
+	city			: { type : Sequelize.STRING },
+	pincode			: { type : Sequelize.STRING },
+	gst_number		: { type : Sequelize.STRING },
+	status 			: { type : Sequelize.BOOLEAN },
+	set_moq 		: { type : Sequelize.BOOLEAN },
+	free_credit  	: { type : Sequelize.BOOLEAN },
+	sub_operators   : { type : Sequelize.BOOLEAN },
+	enable_vod  	: { type : Sequelize.BOOLEAN },
+	ad_provision  	: { type : Sequelize.BOOLEAN },
+	short_code  	: { type : Sequelize.STRING },
+	ott 			: { type : Sequelize.BOOLEAN },
+        iptv 			: { type : Sequelize.BOOLEAN },
+	enable_iptv                    : { type : Sequelize.BOOLEAN },
+	mso_provider             : { type: Sequelize.STRING} ,
+	provider_id		:{ type : Sequelize.UUID },
+        access_type_mobile	: { type : Sequelize.BOOLEAN },
+        access_type_stb 	: { type : Sequelize.BOOLEAN },
+	access_type_tv 	        : { type : Sequelize.BOOLEAN },
+	allowed_app 		: { type: Sequelize.BOOLEAN},
+        mso                     : { type: Sequelize.BOOLEAN},
+        provider_type           : { type: Sequelize.STRING},
+	forced_reseller         : { type: Sequelize.BOOLEAN },
+	org_status              : { type : Sequelize.BOOLEAN }
+
+});
+
+// Provider Model
+var Provider = sequelize.define('providers', {
+        provider_id              : { type : Sequelize.UUID, defaultValue : Sequelize.UUIDV1, primaryKey : true },
+        company_name     : { type : Sequelize.STRING },
+        brand                    : { type : Sequelize.STRING },
+        service_type     : { type : Sequelize.STRING },
+        service_category : { type : Sequelize.STRING },
+        screen_type      : { type : Sequelize.STRING },
+        screens                  : { type : Sequelize.INTEGER, defaultValue: 0 },
+        mobile_screens   : { type : Sequelize.INTEGER, defaultValue: 0 },
+        tv_screens               : { type : Sequelize.INTEGER, defaultValue: 0 },
+        method                   : { type : Sequelize.STRING },
+        attach_logo      : { type : Sequelize.BOOLEAN },
+        logo_url                 : { type : Sequelize.STRING },
+        iptv                     : { type : Sequelize.BOOLEAN },        
+        sms_host                 : { type : Sequelize.STRING },
+        sms_port                 : { type : Sequelize.STRING },
+        sms_token                : { type : Sequelize.STRING },
+        default_method   : { type : Sequelize.STRING },
+        provider_type    : { type : Sequelize.STRING }
+});
+
+var LinkAccess = sequelize.define('link_access', {
+        link_field                              : { type : Sequelize.STRING },
+        link_format                                     : { type : Sequelize.STRING },
+        web_link_field                  : { type : Sequelize.STRING },
+        web_link_format                         : { type : Sequelize.STRING },
+        tv_native_link_field        : { type : Sequelize.STRING },
+        tv_native_link_format           : { type : Sequelize.STRING },
+        mobile_native_link_field    : { type : Sequelize.STRING },
+        mobile_native_link_format       : { type : Sequelize.STRING },
+        invoking_method                         : { type : Sequelize.STRING },
+        allow_sites                         : { type : Sequelize.STRING(10000) },
+        default_screen                          : { type : Sequelize.INTEGER, defaultValue: 0 },
+        default_token_mode                      : { type : Sequelize.STRING }
+});
+
+var DirectAccess = sequelize.define('direct_access', {
+        link_field      : { type : Sequelize.STRING },
+        link_format             : { type : Sequelize.STRING },
+        play_format             : { type : Sequelize.STRING },
+        encrypted       : { type : Sequelize.BOOLEAN },
+        drm_license_url : { type : Sequelize.STRING }
+});
+
+var InvokingMethod = sequelize.define('invoking_method', {
+        org_name                 : { type : Sequelize.STRING },
+        org_id                   : { type : Sequelize.UUID },
+        mode                     : { type : Sequelize.STRING },
+        device_type      : { type : Sequelize.STRING },
+        invoking_method  : { type : Sequelize.STRING },
+        token_mode               : { type : Sequelize.STRING },
+        invoke_screen    : { type : Sequelize.INTEGER },
+        service_category : { type : Sequelize.STRING },
+    method           : { type : Sequelize.STRING }
+});
+
+Provider.hasMany(LinkAccess,{foreignKey:'provider_id',onUpdate:'CASCADE',onDelete:'CASCADE'});
+Provider.hasMany(DirectAccess,{foreignKey:'provider_id',onUpdate:'CASCADE',onDelete:'CASCADE'});
+Provider.hasMany(InvokingMethod,{foreignKey:'provider_id',onUpdate:'CASCADE',onDelete:'CASCADE'});
+
+// Service Type Model
+var ServiceType = sequelize.define('servicetypes', {
+        type_id                  : { type : Sequelize.UUID, defaultValue : Sequelize.UUIDV1 },
+        type                 : { type : Sequelize.STRING },
+        short_code               : { type : Sequelize.STRING }
+});
+
+// Service Category Model
+var ServiceCategory = sequelize.define('servicecategorys', {
+        category_id              : { type : Sequelize.UUID, defaultValue : Sequelize.UUIDV1 },
+        type                 : { type : Sequelize.STRING },
+        short_code               : { type : Sequelize.STRING },
+        filter                   : { type : Sequelize.STRING },
+        sort_by                  : { type : Sequelize.STRING }
+});
+
+//State & City Model
+var State=sequelize.define('states',{
+        state_id        : { type:Sequelize.INTEGER,autoIncrement:true,primaryKey:true},
+        name            : { type:Sequelize.STRING},
+        code            : { type:Sequelize.STRING}
+})
+
+var City=sequelize.define('cities',{
+        name    : {     type:Sequelize.STRING }
+})
+
+State.hasMany(City,{foreignKey:'state_id',onUpdate:'CASCADE',onDelete:'CASCADE'});
+
+var Package = sequelize.define('packages', {
+        package_id                      : { type : Sequelize.UUID, defaultValue : Sequelize.UUIDV1 },
+        provider_id                     : { type : Sequelize.UUID },
+        package_name            : { type : Sequelize.STRING },
+        provider_name           : { type : Sequelize.STRING },
+        provider_category       : { type : Sequelize.JSON },
+        provider_type           : { type : Sequelize.STRING },
+        amount                          : { type : Sequelize.FLOAT, defaultValue :0 },
+});
+
+var Bundle = sequelize.define('bundle', {
+	bundle_id			: { type : Sequelize.UUID, defaultValue : Sequelize.UUIDV1 ,primaryKey:true},
+	bundle_name			: { type : Sequelize.STRING(10000) },
+	price_one_month		: { type : Sequelize.INTEGER },
+	price_three_month	: { type : Sequelize.INTEGER },
+	price_six_month		: { type : Sequelize.INTEGER },
+	price_twelve_month	: { type : Sequelize.INTEGER },
+	moq					: { type : Sequelize.INTEGER },
+	add_on 				: { type : Sequelize.BOOLEAN },
+	iptv 				: { type : Sequelize.BOOLEAN },
+	bundle_type			: { type : Sequelize.STRING, defaultValue :'bundlepackage' },
+	bundle_mode 		: { type : Sequelize.STRING },
+	bundle_cost 		: { type : Sequelize.INTEGER, defaultValue : 0},
+	is_external_packages: { type : Sequelize.BOOLEAN },
+        ott_price            :{ type : Sequelize.FLOAT },
+        recommend_cost             :{ type : Sequelize.FLOAT },
+        seller_cost                :{ type : Sequelize.FLOAT },
+	reseller_bundle_type     : { type : Sequelize.STRING },
+	org_id                   : { type : Sequelize.UUID },
+	operator_margin 	: {type: Sequelize.FLOAT},
+	allowed_device		: { type: Sequelize.STRING }
+});
+
+var BundlePackage = sequelize.define('bundlepackage', {
+        package_id       : {type :Sequelize.UUID },
+        package_name     : {type :Sequelize.STRING },
+        provider_name    : {type :Sequelize.STRING },
+        provider_id      : {type :Sequelize.UUID },
+        provider_category: {type :Sequelize.STRING }
+})
+
+var BundleExternalPackage = sequelize.define('bundle_external_package', {
+        external_app_id : {type :Sequelize.UUID, defaultValue : Sequelize.UUIDV1 },
+        name                    : {type :Sequelize.STRING },
+        link                    : {type :Sequelize.STRING },
+        logo                    : {type :Sequelize.STRING },
+        package_name    : {type :Sequelize.STRING }
+})
+
+var BundleCustomPackage = sequelize.define('bundle_custom_package', {
+        bundle_id               : {type :Sequelize.UUID },
+        custom_bundle_id: {type :Sequelize.UUID },
+        bundle_name     : {type :Sequelize.STRING },
+        bundle_mode     : {type :Sequelize.STRING }
+})
+
+var BundleCustomExternalPackage = sequelize.define('bundle_custom_external_package', {
+	bundle_id  				 : {type :Sequelize.UUID },
+	custom_external_bundle_id: {type :Sequelize.UUID },
+	bundle_name 			 : {type :Sequelize.STRING }
+})
+
+var BundleResellerCustomPackage = sequelize.define('bundle_reseller_custom_package', {
+        bundle_id                : {type :Sequelize.UUID },
+        reseller_custom_bundle_id: {type :Sequelize.UUID },
+        bundle_name              : {type :Sequelize.STRING },
+        bundle_mode              : {type :Sequelize.STRING },
+        reseller_bundle_type     : {type :Sequelize.STRING },
+	iptv      		 : {type :Sequelize.BOOLEAN }
+})
+
+var BundleGroupedPackage = sequelize.define('bundle_grouped_package', {
+	bundle_id		: { type :Sequelize.UUID },
+	grouped_bundle_id	: { type :Sequelize.UUID },
+	bundle_name		: { type :Sequelize.STRING },
+	bundle_mode		: { type :Sequelize.STRING },
+	iptv			: { type :Sequelize.BOOLEAN }
+})
+
+Bundle.hasMany(BundlePackage,{foreignKey:'bundle_id',onUpdate:'CASCADE',onDelete:'CASCADE'});
+Bundle.hasMany(BundleExternalPackage,{foreignKey:'bundle_id',onUpdate:'CASCADE',onDelete:'CASCADE'});
+Bundle.hasMany(BundleCustomPackage,{foreignKey:'bundle_id',onUpdate:'CASCADE',onDelete:'CASCADE'});
+BundleCustomPackage.belongsTo(Bundle,{foreignKey:'custom_bundle_id'});
+BundlePackage.belongsTo(Bundle,{foreignKey:'bundle_id'});
+Bundle.hasMany(BundleCustomExternalPackage,{foreignKey:'bundle_id',onUpdate:'CASCADE',onDelete:'CASCADE'});
+Bundle.hasMany(BundleResellerCustomPackage,{foreignKey:'bundle_id',onUpdate:'CASCADE',onDelete:'CASCADE'});
+Bundle.hasMany(BundleGroupedPackage,{foreignKey:'bundle_id',onUpdate:'CASCADE',onDelete:'CASCADE'});
+
+var OperatorSetting = sequelize.define('operatorsetting', {
+        org_name                  : { type : Sequelize.STRING, primaryKey : true },
+        org_id                    : { type : Sequelize.STRING },
+        reseller_org_id           : { type : Sequelize.STRING },
+        feed_domain               : { type : Sequelize.STRING},
+    sms_host                      : { type : Sequelize.STRING},
+    sms_method                    : { type : Sequelize.STRING},
+    sms_template                  : { type : Sequelize.STRING(1000) },
+        package_name              : { type : Sequelize.STRING},
+        concurrent_login      : { type : Sequelize.INTEGER},
+        custom_fields             : { type : Sequelize.JSON },
+        sms_property              : { type : Sequelize.STRING},
+        sms_api_context           : { type : Sequelize.STRING},
+        sms_template_key          : { type : Sequelize.STRING},
+        type                              : { type : Sequelize.STRING},
+        ncf_bundle_id             : { type : Sequelize.UUID},
+        ncf                               : { type : Sequelize.FLOAT,defaultValue : 0 },
+        ncf_flag                          : { type : Sequelize.BOOLEAN},
+        bundle                    : { type : Sequelize.JSON},
+        addonbundle               : { type : Sequelize.JSON},
+        moqbundle                         : { type : Sequelize.JSON},
+        ad_operator_margin        : { type : Sequelize.INTEGER,defaultValue : 0 },
+        ad_mso_margin             : { type : Sequelize.INTEGER,defaultValue : 0 },
+        ad_sys_margin             : { type : Sequelize.INTEGER,defaultValue : 0 },
+        allow_notification    : { type : Sequelize.BOOLEAN},
+        reference_name            : { type : Sequelize.STRING},
+        allow_operator_content: { type : Sequelize.BOOLEAN},
+        allow_essentials          : { type : Sequelize.BOOLEAN, defaultValue : false},
+        essential_msg             : { type : Sequelize.STRING},
+        short_code                : { type : Sequelize.STRING },
+        language                  : { type : Sequelize.JSON },
+        request_type              : { type : Sequelize.STRING},
+        technical_data            : { type : Sequelize.JSON},
+        external_apps             : { type : Sequelize.BOOLEAN},
+        allow_for_subscription: { type : Sequelize.BOOLEAN},
+        discount                          : { type : Sequelize.INTEGER,defaultValue : 0 },
+        enable_bundle_creation: { type : Sequelize.BOOLEAN, defaultValue : false},
+        payment_fields            : { type : Sequelize.JSON },
+        api_get_payment_link   : { type : Sequelize.STRING },
+        api_payment_link_status: { type : Sequelize.STRING },
+        moq_slab_name              : { type : Sequelize.STRING },
+        moq_cost                           : { type : Sequelize.INTEGER },
+        moq_duration               : { type : Sequelize.STRING },
+        moq_slab_list              : { type : Sequelize.JSON },
+        moq_carry_forward          : { type : Sequelize.BOOLEAN, defaultValue : false },
+	enable_reseller_bundle_creation : { type : Sequelize.BOOLEAN },
+	whatsapp_number            : { type : Sequelize.STRING },
+        pre_activation_flag :Sequelize.STRING },
+	bundle_mode		: { type :Sequelize.STRING },
+	iptv			: { type :Sequelize.BOOLEAN }
+})
+
+Bundle.hasMany(BundlePackage,{foreignKey:'bundle_id',onUpdate:'CASCADE',onDelete:'CASCADE'});
+Bundle.hasMany(BundleExternalPackage,{foreignKey:'bundle_id',onUpdate:'CASCADE',onDelete:'CASCADE'});
+Bundle.hasMany(BundleCustomPackage,{foreignKey:'bundle_id',onUpdate:'CASCADE',onDelete:'CASCADE'});
+BundleCustomPackage.belongsTo(Bundle,{foreignKey:'custom_bundle_id'});
+BundlePackage.belongsTo(Bundle,{foreignKey:'bundle_id'});
+Bundle.hasMany(BundleCustomExternalPackage,{foreignKey:'bundle_id',onUpdate:'CASCADE',onDelete:'CASCADE'});
+Bundle.hasMany(BundleResellerCustomPackage,{foreignKey:'bundle_id',onUpdate:'CASCADE',onDelete:'CASCADE'});
+Bundle.hasMany(BundleGroupedPackage,{foreignKey:'bundle_id',onUpdate:'CASCADE',onDelete:'CASCADE'});
+
+var OperatorSetting = sequelize.define('operatorsetting', {
+        org_name                  : { type : Sequelize.STRING, primaryKey : true },
+        org_id                    : { type : Sequelize.STRING },
+        reseller_org_id           : { type : Sequelize.STRING },
+        feed_domain               : { type : Sequelize.STRING},
+    sms_host                      : { type : Sequelize.STRING},
+    sms_method                    : { type : Sequelize.STRING},
+    sms_template                  : { type : Sequelize.STRING(1000) },
+        package_name              : { type : Sequelize.STRING},
+        concurrent_login      : { type : Sequelize.INTEGER},
+        custom_fields             : { type : Sequelize.JSON },
+        sms_property              : { type : Sequelize.STRING},
+        sms_api_context           : { type : Sequelize.STRING},
+        sms_template_key          : { type : Sequelize.STRING},
+        type                              : { type : Sequelize.STRING},
+        ncf_bundle_id             : { type : Sequelize.UUID},
+        ncf                               : { type : Sequelize.FLOAT,defaultValue : 0 },
+        ncf_flag                          : { type : Sequelize.BOOLEAN},
+        bundle                    : { type : Sequelize.JSON},
+        addonbundle               : { type : Sequelize.JSON},
+        moqbundle                         : { type : Sequelize.JSON},
+        ad_operator_margin        : { type : Sequelize.INTEGER,defaultValue : 0 },
+        ad_mso_margin             : { type : Sequelize.INTEGER,defaultValue : 0 },
+        ad_sys_margin             : { type : Sequelize.INTEGER,defaultValue : 0 },
+        allow_notification    : { type : Sequelize.BOOLEAN},
+        reference_name            : { type : Sequelize.STRING},
+        allow_operator_content: { type : Sequelize.BOOLEAN},
+        allow_essentials          : { type : Sequelize.BOOLEAN, defaultValue : false},
+        essential_msg             : { type : Sequelize.STRING},
+        short_code                : { type : Sequelize.STRING },
+        language                  : { type : Sequelize.JSON },
+        request_type              : { type : Sequelize.STRING},
+        technical_data            : { type : Sequelize.JSON},
+        external_apps             : { type : Sequelize.BOOLEAN},
+        allow_for_subscription: { type : Sequelize.BOOLEAN},
+        discount                          : { type : Sequelize.INTEGER,defaultValue : 0 },
+        enable_bundle_creation: { type : Sequelize.BOOLEAN, defaultValue : false},
+        payment_fields            : { type : Sequelize.JSON },
+        api_get_payment_link   : { type : Sequelize.STRING },
+        api_payment_link_status: { type : Sequelize.STRING },
+        moq_slab_name              : { type : Sequelize.STRING },
+        moq_cost                           : { type : Sequelize.INTEGER },
+        moq_duration               : { type : Sequelize.STRING },
+        moq_slab_list              : { type : Sequelize.JSON },
+        moq_carry_forward          : { type : Sequelize.BOOLEAN, defaultValue : false },
+	enable_reseller_bundle_creation : { type : Sequelize.BOOLEAN },
+	whatsapp_number            : { type : Sequelize.STRING },
+        pre_activation_flag
